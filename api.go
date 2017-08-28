@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
 	"net/http"
 
@@ -13,21 +12,22 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/hello", Hello)
-	router.HandleFunc("/hello/{toshow}", ShowHello)
+	router.HandleFunc("/todos", TodoIndex)
+	router.HandleFunc("/todos/{todoId}", TodoShow)
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "first, %q", html.EscapeString(r.URL.Path))
+	fmt.Fprintln(w, "Welcome!")
 }
 
-func Hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "hello my api")
+func TodoIndex(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Todo Index!")
 }
 
-func ShowHello(w http.ResponseWriter, r *http.Request) {
+func TodoShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	toshow := vars["showhello"]
-	fmt.Fprintln(w, "ShowHello:", toshow)
+	todoId := vars["todoId"]
+	fmt.Fprintln(w, "Todo show:", todoId)
 }
