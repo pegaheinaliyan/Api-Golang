@@ -19,7 +19,6 @@ type Todo struct {
 	Completed bool      `json:"completed"`
 	Due       time.Time `json:"due"`
 }
-
 type Todos []Todo
 
 //routes for api
@@ -29,20 +28,44 @@ type Route struct {
 	Pattern     string
 	HandlerFunc http.HandlerFunc
 }
-
 type Routes []Route
 
+//go main
 func main() {
 
-	log.Printf("hi")
-
 	router := NewRouter()
-
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome!")
+func NewRouter() *mux.Router {
+
+	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range routes {
+
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(route.HandlerFunc)
+	}
+
+	return router
+}
+
+var routes = Routes{
+	Route{
+		"TodoIndex",
+		"GET",
+		"/todos",
+		TodoIndex,
+	},
+
+	Route{
+		"TodoCreate",
+		"POST",
+		"/todos",
+		TodoCreate,
+	},
 }
 
 func TodoIndex(w http.ResponseWriter, r *http.Request) {
@@ -51,12 +74,6 @@ func TodoIndex(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(todos); err != nil {
 		panic(err)
 	}
-}
-
-func TodoShow(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	todoId := vars["todoId"]
-	fmt.Fprintln(w, "Todo show:", todoId)
 }
 
 //for post api
@@ -85,55 +102,7 @@ func TodoCreate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewRouter() *mux.Router {
-
-	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
-
-		var handler http.Handler
-
-		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
-
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(route.HandlerFunc)
-	}
-
-	return router
-}
-
-var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/",
-		Index,
-	},
-	Route{
-		"TodoIndex",
-		"GET",
-		"/todos",
-		TodoIndex,
-	},
-	Route{
-		"TodoShow",
-		"GET",
-		"/todos/{todoId}",
-		TodoShow,
-	},
-	Route{
-		"TodoCreate",
-		"POST",
-		"/todos",
-		TodoCreate,
-	},
-}
-
 var currentId int
-
 var todos Todos
 
 // Give us some seed data
@@ -167,25 +136,4 @@ func RepoDestroyTodo(id int) error {
 		}
 	}
 	return fmt.Errorf("Could not find Todo with id of %d to delete", id)
-}
-
-//for logging in console/not working
-func Logger(inner http.Handler, name string) http.Handler {
-	log.Printf("hello")
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("here")
-
-		start := time.Now()
-
-		inner.ServeHTTP(w, r)
-
-		log.Printf(
-			"%s\t%s\t%s\t%s",
-			r.Method,
-			r.RequestURI,
-			name,
-			time.Since(start),
-		)
-	})
 }
