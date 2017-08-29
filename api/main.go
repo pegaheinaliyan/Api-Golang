@@ -38,6 +38,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
+//make our own route
 func NewRouter() *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -81,6 +82,7 @@ var routes = Routes{
 	},
 }
 
+//for get api
 func TodoIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -89,6 +91,7 @@ func TodoIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//for another api
 func TodoShow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -129,6 +132,7 @@ func TodoCreate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//for delete api
 func TodoDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -152,6 +156,7 @@ func init() {
 	RepoCreateTodo(Todo{Name: "Host meetup"})
 }
 
+//for get api
 func RepoFindTodo(id int) Todo {
 	for _, t := range todos {
 		if t.Id == id {
@@ -162,6 +167,7 @@ func RepoFindTodo(id int) Todo {
 	return Todo{}
 }
 
+//for post api
 func RepoCreateTodo(t Todo) Todo {
 	currentId += 1
 	t.Id = currentId
@@ -169,6 +175,7 @@ func RepoCreateTodo(t Todo) Todo {
 	return t
 }
 
+//for delete api
 func RepoDestroyTodo(id int) error {
 	for i, t := range todos {
 		if t.Id == id {
