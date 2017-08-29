@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -59,12 +60,24 @@ var routes = Routes{
 		"/todos",
 		TodoIndex,
 	},
-
+	Route{
+		"TodoShow",
+		"GET",
+		"/todos/{todoId}",
+		TodoShow,
+	},
 	Route{
 		"TodoCreate",
 		"POST",
 		"/todos",
 		TodoCreate,
+	},
+
+	Route{
+		"TodoDelete",
+		"DELETE",
+		"/todos/{todoId}",
+		TodoDelete,
 	},
 }
 
@@ -72,6 +85,20 @@ func TodoIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(todos); err != nil {
+		panic(err)
+	}
+}
+
+func TodoShow(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	vars := mux.Vars(r)
+	todoId, err := strconv.Atoi(vars["todoId"])
+	if err != nil {
+		panic(err)
+	}
+	todo := RepoFindTodo(todoId)
+	if err := json.NewEncoder(w).Encode(todo); err != nil {
 		panic(err)
 	}
 }
@@ -98,6 +125,20 @@ func TodoCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(t); err != nil {
+		panic(err)
+	}
+}
+
+func TodoDelete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	vars := mux.Vars(r)
+	todoId, err := strconv.Atoi(vars["todoId"])
+	if err != nil {
+		panic(err)
+	}
+	err = RepoDestroyTodo(todoId)
+	if err != nil {
 		panic(err)
 	}
 }
