@@ -25,6 +25,8 @@ type product struct {
 	Price float64 `json:"price"`
 }
 
+//main:entry point for our application
+//This assumes that you use environment variables APP_DB_USERNAME, APP_DB_PASSWORD, and APP_DB_NAME to store your database's username, password, and name respectively.
 func main() {
 	a := App{}
 	a.Initialize(
@@ -35,6 +37,8 @@ func main() {
 	a.Run(":8080")
 }
 
+// connect to the database
+// It will create a database connection and wire up the routes to respond according to the requirements.
 func (a *App) Initialize(user, password, dbname string) {
 	var err error
 	a.DB, err = sql.Open("postgres", "postgres://ccadmin:TokyoBootCamp@localhost/pro?sslmode=disable")
@@ -46,16 +50,17 @@ func (a *App) Initialize(user, password, dbname string) {
 	a.initializeRoutes()
 }
 
+//  start the application.
 func (a *App) Run(addr string) {
 	log.Fatal(http.ListenAndServe(":8000", a.Router))
 }
 
 func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
-	a.Router.HandleFunc("/product", a.createProduct).Methods("POST")
-	a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
-	a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
-	a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
+	a.Router.HandleFunc("/products", a.createProduct).Methods("POST")
+	a.Router.HandleFunc("/products/{id:[0-9]+}", a.getProduct).Methods("GET")
+	a.Router.HandleFunc("/products/{id:[0-9]+}", a.updateProduct).Methods("PUT")
+	a.Router.HandleFunc("/products/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
 }
 
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +176,8 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(response)
 }
 
-//// model.go//query
+// model.go//query
+//deal with a single product as methods on this struct
 
 func (p *product) getProduct(db *sql.DB) error {
 	return db.QueryRow("SELECT name, price FROM products WHERE id=$1",
