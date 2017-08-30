@@ -50,17 +50,18 @@ func (a *App) Initialize(user, password, dbname string) {
 	a.initializeRoutes()
 }
 
-//  start the application.
-func (a *App) Run(addr string) {
-	log.Fatal(http.ListenAndServe(":8000", a.Router))
-}
-
+//The {id:[0-9]+} part of the path indicates that Gorilla Mux should treat process a URL only if the id is a number
 func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/products", a.getProducts).Methods("GET")
 	a.Router.HandleFunc("/products", a.createProduct).Methods("POST")
 	a.Router.HandleFunc("/products/{id:[0-9]+}", a.getProduct).Methods("GET")
 	a.Router.HandleFunc("/products/{id:[0-9]+}", a.updateProduct).Methods("PUT")
 	a.Router.HandleFunc("/products/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
+}
+
+//  start the application.
+func (a *App) Run(addr string) {
+	log.Fatal(http.ListenAndServe(":8000", a.Router))
 }
 
 func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +84,7 @@ func (a *App) getProducts(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, products)
 }
 
+//This handler assumes that the request body is a JSON object containing the details of the product to be created. It extracts that object into a product
 func (a *App) createProduct(w http.ResponseWriter, r *http.Request) {
 	var p product
 	decoder := json.NewDecoder(r.Body)
@@ -100,6 +102,7 @@ func (a *App) createProduct(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, p)
 }
 
+//This handler retrieves the id of the product to be fetched from the requested URL, and uses the getProduct method, created in the previous section, to fetch the details of that product.
 func (a *App) getProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -169,6 +172,7 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	//marshal a JSON-encoded
 	response, _ := json.Marshal(payload)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -223,6 +227,7 @@ func getProducts(db *sql.DB, start, count int) ([]product, error) {
 
 	products := []product{}
 
+	//iterate over the rows
 	for rows.Next() {
 		var p product
 		if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
