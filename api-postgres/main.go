@@ -238,3 +238,5 @@ func getProducts(db *sql.DB, start, count int) ([]product, error) {
 
 	return products, nil
 }
+
+/////////////////////////////////////////////////////////////////
